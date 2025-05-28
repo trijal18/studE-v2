@@ -1,14 +1,273 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>Summary</title>
-  <link rel="stylesheet" href="/static/style.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document Summary - Quiz Generator</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #74b9ff 0%, #0984e3 100%);
+            min-height: 100vh;
+            padding: 2rem 1rem;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 24px;
+            overflow: hidden;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .header {
+            background: linear-gradient(135deg, #00b894, #00a085);
+            padding: 2.5rem;
+            text-align: center;
+            color: white;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+            animation: float 6s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translate(-50%, -50%) rotate(0deg); }
+            50% { transform: translate(-50%, -50%) rotate(180deg); }
+        }
+
+        .header-content {
+            position: relative;
+            z-index: 1;
+        }
+
+        .summary-icon {
+            width: 60px;
+            height: 60px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1rem;
+            font-size: 1.8rem;
+        }
+
+        h2 {
+            font-size: 2.2rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .subtitle {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .content {
+            padding: 3rem;
+        }
+
+        .summary-card {
+            background: #f8fafc;
+            border-radius: 16px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            border-left: 4px solid #00b894;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .summary-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 100px;
+            height: 100px;
+            background: linear-gradient(135deg, rgba(0, 184, 148, 0.1), transparent);
+            border-radius: 0 0 0 100px;
+        }
+
+        .summary-text {
+            font-size: 1.1rem;
+            line-height: 1.8;
+            color: #2d3748;
+            position: relative;
+            z-index: 1;
+        }
+
+        .action-section {
+            text-align: center;
+            padding-top: 1rem;
+        }
+
+        .start-quiz-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.75rem;
+            background: linear-gradient(135deg, #74b9ff, #0984e3);
+            color: white;
+            text-decoration: none;
+            padding: 1.25rem 2.5rem;
+            border-radius: 16px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .start-quiz-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 30px rgba(116, 185, 255, 0.4);
+        }
+
+        .start-quiz-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .start-quiz-btn:hover::before {
+            left: 100%;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-top: 2rem;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 16px;
+            text-align: center;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            border: 1px solid #e2e8f0;
+            transition: transform 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-2px);
+        }
+
+        .stat-icon {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, #ff7675, #e84393);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 0.75rem;
+            color: white;
+            font-size: 1.2rem;
+        }
+
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #2d3748;
+            margin-bottom: 0.25rem;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            color: #718096;
+            font-weight: 500;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                margin: 1rem;
+            }
+
+            .header {
+                padding: 2rem;
+            }
+
+            .content {
+                padding: 2rem;
+            }
+
+            .stats {
+                grid-template-columns: 1fr;
+            }
+
+            h2 {
+                font-size: 1.8rem;
+            }
+        }
+    </style>
 </head>
 <body>
-  <div class="container">
-    <h2>Summary</h2>
-    <p>{{ summary }}</p>
-    <a href="/questions/{{ session_id }}" class="button">Start Quiz</a>
-  </div>
+    <div class="container">
+        <div class="header">
+            <div class="header-content">
+                <div class="summary-icon">📋</div>
+                <h2>Document Summary</h2>
+                <p class="subtitle">AI-generated overview of your PDF content</p>
+            </div>
+        </div>
+
+        <div class="content">
+            <div class="summary-card">
+                <div class="summary-text">
+                    {{ summary }}
+                </div>
+            </div>
+
+            <div class="stats">
+                <div class="stat-card">
+                    <div class="stat-icon">📄</div>
+                    <div class="stat-value">Ready</div>
+                    <div class="stat-label">Document Processed</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">🎯</div>
+                    <div class="stat-value">Smart</div>
+                    <div class="stat-label">Questions Generated</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">⚡</div>
+                    <div class="stat-value">Fast</div>
+                    <div class="stat-label">Quiz Creation</div>
+                </div>
+            </div>
+
+            <div class="action-section">
+                <a href="/questions/{{ session_id }}" class="start-quiz-btn">
+                    <span>🚀</span>
+                    <span>Start Interactive Quiz</span>
+                </a>
+            </div>
+        </div>
+    </div>
 </body>
 </html>
