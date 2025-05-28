@@ -196,4 +196,4 @@ def generate_questions(file_path: str) -> list:
         print("Received text:\n", raw_text)
         return []
 
-print(generate_questions(r"D:\projects\studE-v2\project\uploads\5c32ffa3-770f-4766-87e2-c8fc543fbe9e.pdf"))
+# print(generate_questions(r"D:\projects\studE-v2\project\uploads\5c32ffa3-770f-4766-87e2-c8fc543fbe9e.pdf"))

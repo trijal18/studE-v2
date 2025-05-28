@@ -1,13 +1,15 @@
-from fastapi import FastAPI, UploadFile, File, HTTPException
+from fastapi import FastAPI, UploadFile, File, HTTPException, Request, Form
 from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel
+from fastapi.responses import HTMLResponse, RedirectResponse
+from fastapi.staticfiles import StaticFiles
+from fastapi.templating import Jinja2Templates
 import uuid
 import os
+
 from modules.generate_mcqs import generate_summary, generate_questions
 
 app = FastAPI()
 
-# CORS Middleware
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -16,20 +18,28 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# In-memory session storage
-sessions = {}
-
 UPLOAD_DIR = "uploads"
 os.makedirs(UPLOAD_DIR, exist_ok=True)
 
-@app.post("/upload/")
-async def upload_pdf(file: UploadFile = File(...)):
+# Store sessions in-memory
+sessions = {}
+
+# Templates and static files
+app.mount("/static", StaticFiles(directory="static"), name="static")
+templates = Jinja2Templates(directory="templates")
+
+@app.get("/", response_class=HTMLResponse)
+def home(request: Request):
+    return templates.TemplateResponse("upload.html", {"request": request})
+
+@app.post("/upload/", response_class=HTMLResponse)
+async def upload(request: Request, file: UploadFile = File(...)):
     if file.content_type != "application/pdf":
-        raise HTTPException(status_code=400, detail="Only PDF files are allowed.")
+        raise HTTPException(status_code=400, detail="Only PDF files allowed.")
 
     file_id = str(uuid.uuid4())
     file_path = os.path.join(UPLOAD_DIR, f"{file_id}.pdf")
-
+    
     with open(file_path, "wb") as f:
         f.write(await file.read())
 
@@ -41,24 +51,76 @@ async def upload_pdf(file: UploadFile = File(...)):
 
     sessions[file_id] = {
         "questions": questions,
-        "summary": summary
+        "summary": summary,
+        "index": 0,
+        "score": 0
     }
 
-    return {"session_id": file_id, "summary": summary}
+    # Redirect to summary page
+    response = RedirectResponse(url=f"/summary/{file_id}", status_code=303)
+    return response
 
+@app.get("/summary/{session_id}", response_class=HTMLResponse)
+def summary_page(request: Request, session_id: str):
+    session = sessions.get(session_id)
+    if not session:
+        raise HTTPException(status_code=404, detail="Session not found")
+    return templates.TemplateResponse("summary.html", {
+        "request": request,
+        "session_id": session_id,
+        "summary": session["summary"]
+    })
 
-@app.get("/questions/{session_id}")
-def get_all_questions(session_id: str):
+@app.get("/questions/{session_id}", response_class=HTMLResponse)
+def show_question(request: Request, session_id: str):
     session = sessions.get(session_id)
     if not session:
         raise HTTPException(status_code=404, detail="Session not found")
 
-    return {
-        "questions": session["questions"],
-        # "summary": session["summary"],
-        "total": len(session["questions"])
-    }
+    index = session["index"]
+    if index >= len(session["questions"]):
+        return templates.TemplateResponse("questions.html", {
+            "request": request,
+            "completed": True,
+            "score": session["score"],
+            "total": len(session["questions"]),
+            "session_id": session_id
+        })
 
-@app.get("/")
-def root():
-    return {"message": "MCQ FastAPI Quiz App is running."}
+    question = session["questions"][index]
+    return templates.TemplateResponse("questions.html", {
+        "request": request,
+        "question": question["question"],
+        "options": question["options"],
+        "index": index + 1,
+        "completed": False,
+        "session_id": session_id
+    })
+
+@app.post("/answer/{session_id}", response_class=HTMLResponse)
+async def submit_answer(request: Request, session_id: str, selected_option: str = Form(...)):
+    session = sessions.get(session_id)
+    if not session:
+        raise HTTPException(status_code=404, detail="Session not found")
+
+    index = session["index"]
+    if index >= len(session["questions"]):
+        return RedirectResponse(url=f"/questions/{session_id}", status_code=303)
+
+    correct_answer = session["questions"][index]["answer"].strip()
+    is_correct = selected_option.strip() == correct_answer
+
+    if is_correct:
+        session["score"] += 1
+
+    session["index"] += 1
+
+    return templates.TemplateResponse("questions.html", {
+        "request": request,
+        "feedback": "Correct!" if is_correct else f"Wrong. Correct answer: {correct_answer}",
+        "next_url": f"/questions/{session_id}",
+        "completed": session["index"] >= len(session["questions"]),
+        "score": session["score"],
+        "total": len(session["questions"]),
+        "session_id": session_id
+    })

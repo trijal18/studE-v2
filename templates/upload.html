@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Upload PDF</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <div class="container">
+    <h2>Upload a PDF to Generate MCQs</h2>
+    <form action="/upload/" method="post" enctype="multipart/form-data">
+      <input type="file" name="file" accept=".pdf" required />
+      <button type="submit">Upload PDF</button>
+    </form>
+  </div>
+</body>
+</html>

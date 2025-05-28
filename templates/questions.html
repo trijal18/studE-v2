@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Quiz</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <div class="container">
+    {% if completed %}
+      <h2>Quiz Completed</h2>
+      <p>Your Score: <strong>{{ score }} / {{ total }}</strong></p>
+      <a href="/" class="button">Start Again</a>
+    {% else %}
+      <h3>Question {{ index }}</h3>
+      <form action="/answer/{{ session_id }}" method="post">
+        <p>{{ question }}</p>
+        {% for option in options %}
+          <label class="radio-option">
+            <input type="radio" name="selected_option" value="{{ option }}" required />
+            {{ option }}
+          </label>
+        {% endfor %}
+        <button type="submit">Submit</button>
+      </form>
+    {% endif %}
+
+    {% if feedback %}
+      <p class="{{ 'correct' if 'Correct' in feedback else 'incorrect' }}">
+        {{ feedback }}
+      </p>
+      <a href="{{ next_url }}" class="button">Next Question</a>
+    {% endif %}
+  </div>
+</body>
+</html>
