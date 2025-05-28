@@ -118,6 +118,7 @@ import json
 from dotenv import load_dotenv
 import google.generativeai as genai
 import modules.pdf_to_text as pdf_to_text
+# import pdf_to_text
 
 # Load API key and configure Gemini
 load_dotenv()
@@ -144,17 +145,21 @@ mcq_model = genai.GenerativeModel(
     model_name="gemini-1.5-flash",
     generation_config=generation_config,
     system_instruction="""
-    Generate 10 multiple-choice questions based on the given text.
-    Format the response as a JSON array of objects like:
+             **Prompt:**  
+                "Generate multiple-choice questions based on the given text. Provide the question, a list of plausible answer options, and indicate the correct answer. Format the response as a JSON object. Ensure the question and options are clear and directly related to the content of the text.  
 
-    [
-        {
-            "question": "...",
-            "options": ["...", "...", "...", "..."],
-            "answer": "..."
-        }
-    ]
-    """
+                **Example Output:**
+                    {
+                    "question": "What is VNC used for in the context of a Raspberry Pi?",
+                    "options": [
+                        "To access the Raspberry Pi's graphical interface remotely",
+                        "To control the Raspberry Pi's camera",
+                        "To update the Raspberry Pi's operating system",
+                        "To connect the Raspberry Pi to a network"
+                    ],
+                    "answer": "To access the Raspberry Pi's graphical interface remotely"
+                    }
+            """
 )
 
 def generate_summary(file_path: str) -> str:
@@ -190,3 +195,5 @@ def generate_questions(file_path: str) -> list:
         print("JSON Decode Error:", e)
         print("Received text:\n", raw_text)
         return []
+
+print(generate_questions(r"D:\projects\studE-v2\project\uploads\5c32ffa3-770f-4766-87e2-c8fc543fbe9e.pdf"))
