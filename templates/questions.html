@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!-- <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -374,6 +374,456 @@
                 </form>
 
                 {% if feedback %}
+                <div class="feedback-container {{ 'correct' if 'Correct' in feedback else 'incorrect' }}">
+                    {{ feedback }}
+                    <a href="{{ next_url }}" class="next-btn">
+                        <span>Next Question</span>
+                        <span>→</span>
+                    </a>
+                </div>
+                {% endif %}
+            </div>
+        {% endif %}
+    </div>
+
+    <script>
+        // Add smooth interactions
+        const options = document.querySelectorAll('.option-label');
+        options.forEach(option => {
+            option.addEventListener('click', function() {
+                // Remove previous selections visual feedback
+                options.forEach(opt => opt.classList.remove('selected'));
+                // Add selection class
+                this.classList.add('selected');
+            });
+        });
+
+        // Form submission enhancement
+        const form = document.querySelector('form');
+        if (form) {
+            form.addEventListener('submit', function(e) {
+                const submitBtn = this.querySelector('.submit-btn');
+                submitBtn.innerHTML = 'Processing... ⏳';
+                submitBtn.disabled = true;
+            });
+        }
+    </script>
+</body>
+</html> -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Quiz - Quiz Generator</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #e17055 0%, #d63031 100%);
+            min-height: 100vh;
+            padding: 1rem;
+        }
+
+        .quiz-container {
+            max-width: 700px;
+            margin: 2rem auto;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 24px;
+            overflow: hidden;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .quiz-header {
+            background: linear-gradient(135deg, #6c5ce7, #a29bfe);
+            padding: 2rem;
+            color: white;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .quiz-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.2), transparent 50%);
+        }
+
+        .quiz-content {
+            position: relative;
+            z-index: 1;
+        }
+
+        .question-number {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: rgba(255, 255, 255, 0.2);
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+
+        .quiz-title {
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .quiz-body {
+            padding: 2.5rem;
+        }
+
+        .question-text {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: #2d3748;
+            margin-bottom: 2rem;
+            line-height: 1.6;
+        }
+
+        .options-container {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .option-wrapper {
+            position: relative;
+        }
+
+        .option-input {
+            position: absolute;
+            opacity: 0;
+            cursor: pointer;
+        }
+
+        .option-label {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1.25rem;
+            background: #f8fafc;
+            border: 2px solid #e2e8f0;
+            border-radius: 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 1rem;
+            font-weight: 500;
+            color: #4a5568;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .option-label::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(108, 92, 231, 0.1), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .option-label:hover {
+            border-color: #6c5ce7;
+            background: #edf2f7;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(108, 92, 231, 0.15);
+        }
+
+        .option-label:hover::before {
+            left: 100%;
+        }
+
+        .option-input:checked + .option-label {
+            border-color: #6c5ce7;
+            background: linear-gradient(135deg, #6c5ce7, #a29bfe);
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(108, 92, 231, 0.3);
+        }
+
+        .option-marker {
+            width: 20px;
+            height: 20px;
+            border: 2px solid #cbd5e0;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .option-input:checked + .option-label .option-marker {
+            border-color: white;
+            background: white;
+            color: #6c5ce7;
+        }
+
+        .submit-btn {
+            width: 100%;
+            background: linear-gradient(135deg, #00b894, #00a085);
+            color: white;
+            border: none;
+            padding: 1.25rem;
+            border-radius: 16px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(0, 184, 148, 0.3);
+        }
+
+        .submit-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .submit-btn:hover::before {
+            left: 100%;
+        }
+
+        /* Completed State */
+        .completion-container {
+            text-align: center;
+            padding: 3rem 2rem;
+        }
+
+        .completion-icon {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, #00b894, #00a085);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1.5rem;
+            font-size: 2.5rem;
+            color: white;
+            animation: bounce 1s ease-in-out;
+        }
+
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+            40% { transform: translateY(-10px); }
+            60% { transform: translateY(-5px); }
+        }
+
+        .completion-title {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #2d3748;
+            margin-bottom: 1rem;
+        }
+
+        .score-display {
+            font-size: 1.5rem;
+            color: #6c5ce7;
+            font-weight: 600;
+            margin-bottom: 2rem;
+        }
+
+        .restart-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.75rem;
+            background: linear-gradient(135deg, #6c5ce7, #a29bfe);
+            color: white;
+            text-decoration: none;
+            padding: 1rem 2rem;
+            border-radius: 16px;
+            font-size: 1rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .restart-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(108, 92, 231, 0.3);
+        }
+
+        /* Feedback Styles */
+        .feedback-container {
+            margin-top: 2rem;
+            padding: 1.5rem;
+            border-radius: 16px;
+            font-weight: 600;
+            text-align: center;
+        }
+
+        .feedback-container.correct {
+            background: linear-gradient(135deg, #00b894, #00a085);
+            color: white;
+        }
+
+        .feedback-container.incorrect {
+            background: linear-gradient(135deg, #e17055, #d63031);
+            color: white;
+        }
+
+        /* Wrong answer styling */
+        .option-input.wrong + .option-label {
+            border-color: #e17055 !important;
+            background: linear-gradient(135deg, #e17055, #d63031) !important;
+            color: white !important;
+            animation: shake 0.5s ease-in-out;
+        }
+
+        .option-input.wrong + .option-label .option-marker {
+            border-color: white !important;
+            background: white !important;
+            color: #e17055 !important;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+
+        .next-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.75rem;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            text-decoration: none;
+            padding: 1rem 1.5rem;
+            border-radius: 12px;
+            font-weight: 600;
+            margin-top: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .next-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+        }
+
+        @media (max-width: 768px) {
+            .quiz-container {
+                margin: 1rem auto;
+            }
+
+            .quiz-header {
+                padding: 1.5rem;
+            }
+
+            .quiz-body {
+                padding: 2rem;
+            }
+
+            .quiz-title {
+                font-size: 1.5rem;
+            }
+
+            .question-text {
+                font-size: 1.1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="quiz-container">
+        {% if completed %}
+            <div class="quiz-header">
+                <div class="quiz-content">
+                    <div class="completion-icon">🎉</div>
+                    <h2 class="completion-title">Quiz Completed!</h2>
+                </div>
+            </div>
+            
+            <div class="completion-container">
+                <div class="score-display">
+                    Your Score: <strong>{{ score }} / {{ total }}</strong>
+                </div>
+                <a href="/upload" class="restart-btn">
+                    <span>🔄</span>
+                    <span>Start New Quiz</span>
+                </a>
+            </div>
+        {% else %}
+            <div class="quiz-header">
+                <div class="quiz-content">
+                    <div class="question-number">
+                        <span>📝</span>
+                        <span>Question {{ index }}</span>
+                    </div>
+                    <h2 class="quiz-title">Interactive Quiz</h2>
+                </div>
+            </div>
+
+            <div class="quiz-body">
+                {% if not feedback %}
+                <form action="/answer/{{ session_id }}" method="post">
+                    <div class="question-text">{{ question }}</div>
+                    
+                    <div class="options-container">
+                        {% for option in options %}
+                        <div class="option-wrapper">
+                            <input type="radio" name="selected_option" value="{{ option }}" required 
+                                   class="option-input" id="option-{{ loop.index }}">
+                            <label for="option-{{ loop.index }}" class="option-label">
+                                <div class="option-marker">{{ loop.index }}</div>
+                                <span>{{ option }}</span>
+                            </label>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    
+                    <button type="submit" class="submit-btn">
+                        Submit Answer ✓
+                    </button>
+                </form>
+                {% else %}
+                <div class="question-text">{{ question }}</div>
+                
+                <div class="options-container">
+                    {% for option in options %}
+                    <div class="option-wrapper">
+                        <input type="radio" name="selected_option" value="{{ option }}" disabled
+                               class="option-input {{ 'wrong' if option == selected_option and 'Incorrect' in feedback else '' }}" 
+                               id="option-{{ loop.index }}" 
+                               {{ 'checked' if option == selected_option else '' }}>
+                        <label for="option-{{ loop.index }}" class="option-label">
+                            <div class="option-marker">{{ loop.index }}</div>
+                            <span>{{ option }}</span>
+                        </label>
+                    </div>
+                    {% endfor %}
+                </div>
+
                 <div class="feedback-container {{ 'correct' if 'Correct' in feedback else 'incorrect' }}">
                     {{ feedback }}
                     <a href="{{ next_url }}" class="next-btn">

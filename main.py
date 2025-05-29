@@ -29,6 +29,15 @@ app.mount("/static", StaticFiles(directory="static"), name="static")
 templates = Jinja2Templates(directory="templates")
 
 @app.get("/", response_class=HTMLResponse)
+def login_page(request: Request):
+    return templates.TemplateResponse("login.html", {"request": request})
+
+@app.get("/home", response_class=HTMLResponse)
+def home_page(request: Request):
+    return templates.TemplateResponse("home.html", {"request": request})
+
+
+@app.get("/upload", response_class=HTMLResponse)
 def home(request: Request):
     return templates.TemplateResponse("upload.html", {"request": request})
 
@@ -124,3 +133,7 @@ async def submit_answer(request: Request, session_id: str, selected_option: str 
         "total": len(session["questions"]),
         "session_id": session_id
     })
+
+@app.exception_handler(404)
+async def custom_404_handler(request: Request, exc):
+    return templates.TemplateResponse("404.html", {"request": request}, status_code=404)
