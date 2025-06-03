@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html>
+<head><title>Leaderboard</title></head>
+<body>
+<h2>Top Scorers</h2>
+<table border="1">
+  <tr><th>Username</th><th>Score</th></tr>
+  {% for item in leaderboard %}
+  <tr><td>{{ item.username }}</td><td>{{ item.score }}</td></tr>
+  {% endfor %}
+</table>
+<a href="/home">Back to Home</a>
+</body>
+</html>

@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+<head><title>Admin Panel</title></head>
+<body>
+<h2>Admin Panel - PDFs</h2>
+<table border="1">
+  <tr><th>PDF ID</th><th>Filename</th><th>Actions</th></tr>
+  {% for pdf in pdfs %}
+  <tr>
+    <td>{{ pdf._id }}</td>
+    <td>{{ pdf.filename }}</td>
+    <td>
+      <form method="post" action="/admin/delete" onsubmit="return confirm('Delete this PDF?');">
+        <input type="hidden" name="pdf_id" value="{{ pdf._id }}">
+        <button type="submit">Delete</button>
+      </form>
+    </td>
+  </tr>
+  {% endfor %}
+</table>
+<a href="/home">Back to Home</a>
+</body>
+</html>

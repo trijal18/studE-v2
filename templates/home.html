@@ -2,7 +2,15 @@
 <html>
 <head><title>Home</title></head>
 <body>
-  <h2>Welcome!</h2>
-  <a href="/upload">Upload a PDF to Generate MCQs</a>
+<h2>Welcome, {{ user.username }}!</h2>
+<nav>
+  <a href="/upload">Upload PDF</a> |
+  <a href="/quiz_redirect">Start Quiz by PDF ID</a> |
+  <a href="/leaderboard">Leaderboard</a> |
+  {% if user.email == getenv('ADMIN_EMAIL') %}
+  <a href="/admin">Admin Panel</a> |
+  {% endif %}
+  <a href="/logout">Logout</a>
+</nav>
 </body>
 </html>

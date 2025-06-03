@@ -1,21 +1,22 @@
 <!DOCTYPE html>
 <html>
-<head><title>Questions</title></head>
+<head><title>Quiz Question</title></head>
 <body>
-  {% if completed %}
-    <h2>Quiz Completed</h2>
-    <p>Your Score: {{ score }}/{{ total }}</p>
-  {% else %}
-    <h2>Question {{ index }}</h2>
-    <form action="/answer/{{ session_id }}" method="post">
-      <p>{{ question }}</p>
-      {% for option in options %}
-        <input type="radio" name="selected_option" value="{{ option }}" required> {{ option }}<br>
-      {% endfor %}
-      <input type="hidden" name="user_id" value="{{ user_id }}">
-      <input type="hidden" name="index" value="{{ index }}">
-      <button type="submit">Submit Answer</button>
-    </form>
-  {% endif %}
+{% if completed %}
+  <h2>Quiz Completed!</h2>
+  <p>Your Score: {{ score }} / {{ total }}</p>
+  <a href="/home">Back to Home</a>
+{% else %}
+  <h2>Question {{ index }}</h2>
+  <p>{{ question }}</p>
+  <form method="post" action="/answer/{{ pdf_id }}">
+    {% for option in options %}
+      <input type="radio" name="selected_option" value="{{ option }}" required> {{ option }}<br>
+    {% endfor %}
+    <input type="hidden" name="index" value="{{ index }}">
+    <button type="submit">Submit</button>
+  </form>
+  <a href="/home">Cancel Quiz</a>
+{% endif %}
 </body>
 </html>
