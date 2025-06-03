@@ -1,44 +1,39 @@
+import uuid, os, bcrypt
 from fastapi import FastAPI, UploadFile, File, HTTPException, Request, Form
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
-from pydantic import BaseModel, EmailStr
+from pydantic import EmailStr
 from pymongo import MongoClient
-import uuid, os, bcrypt
-
+from dotenv import load_dotenv
 from modules.generate_mcqs import generate_summary, generate_questions
 
 app = FastAPI()
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"], allow_credentials=True, allow_methods=["*"], allow_headers=["*"]
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"]
 )
 
-# Mongo Setup
-client = MongoClient("mongodb://localhost:27017/")
+# MongoDB setup
+load_dotenv()
+MONGO_URL = os.getenv("MONGO_UR")
+client = MongoClient(MONGO_URL)
 db = client.mcqapp
 users_col = db.users
 pdfs_col = db.pdfs
 scores_col = db.scores
 
-# Paths
+# Upload directory
 UPLOAD_DIR = "uploads"
 os.makedirs(UPLOAD_DIR, exist_ok=True)
 
-# Templates and static
+# Templates & Static
 app.mount("/static", StaticFiles(directory="static"), name="static")
 templates = Jinja2Templates(directory="templates")
-
-# User Models
-class UserSignup(BaseModel):
-    username: str
-    email: EmailStr
-    password: str
-
-class UserLogin(BaseModel):
-    email: EmailStr
-    password: str
 
 # HTML Routes
 @app.get("/", response_class=HTMLResponse)
@@ -57,26 +52,35 @@ def home_page(request: Request):
 def upload_page(request: Request):
     return templates.TemplateResponse("upload.html", {"request": request})
 
-# API Endpoints
+# Form-based Signup
 @app.post("/signup")
-async def signup(user: UserSignup):
-    if users_col.find_one({"email": user.email}):
+async def signup(
+    username: str = Form(...),
+    email: EmailStr = Form(...),
+    password: str = Form(...)
+):
+    if users_col.find_one({"email": email}):
         raise HTTPException(status_code=400, detail="Email already exists.")
-    hashed = bcrypt.hashpw(user.password.encode(), bcrypt.gensalt())
+    hashed = bcrypt.hashpw(password.encode(), bcrypt.gensalt())
     users_col.insert_one({
-        "username": user.username,
-        "email": user.email,
+        "username": username,
+        "email": email,
         "password": hashed
     })
     return {"message": "Signup successful"}
 
+# Form-based Login
 @app.post("/login")
-async def login(user: UserLogin):
-    db_user = users_col.find_one({"email": user.email})
-    if not db_user or not bcrypt.checkpw(user.password.encode(), db_user['password']):
+async def login(
+    email: EmailStr = Form(...),
+    password: str = Form(...)
+):
+    db_user = users_col.find_one({"email": email})
+    if not db_user or not bcrypt.checkpw(password.encode(), db_user['password']):
         raise HTTPException(status_code=401, detail="Invalid credentials")
     return {"message": "Login successful", "user_id": str(db_user["_id"])}
 
+# Upload and MCQ generation
 @app.post("/upload/", response_class=HTMLResponse)
 async def upload(request: Request, file: UploadFile = File(...), user_id: str = Form(...)):
     if file.content_type != "application/pdf":
@@ -90,7 +94,6 @@ async def upload(request: Request, file: UploadFile = File(...), user_id: str = 
         questions = generate_questions(file_path)
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to generate: {e}")
-
     pdfs_col.insert_one({
         "file_id": file_id,
         "file_path": file_path,
@@ -99,8 +102,10 @@ async def upload(request: Request, file: UploadFile = File(...), user_id: str = 
     })
     return RedirectResponse(f"/summary/{file_id}?user_id={user_id}", status_code=303)
 
+# View Summary Page
 @app.get("/summary/{file_id}", response_class=HTMLResponse)
 def summary_page(request: Request, file_id: str, user_id: str):
+# def summary_page(request: Request, file_id: str):
     pdf = pdfs_col.find_one({"file_id": file_id})
     if not pdf:
         raise HTTPException(status_code=404, detail="File not found.")
@@ -108,9 +113,10 @@ def summary_page(request: Request, file_id: str, user_id: str):
         "request": request,
         "summary": pdf["summary"],
         "session_id": file_id,
-        "user_id": user_id
+        # "user_id": user_id
     })
 
+# View MCQ Questions Page
 @app.get("/questions/{session_id}", response_class=HTMLResponse)
 def question_page(request: Request, session_id: str, user_id: str, index: int = 0):
     pdf = pdfs_col.find_one({"file_id": session_id})
@@ -132,6 +138,7 @@ def question_page(request: Request, session_id: str, user_id: str, index: int = 
         "user_id": user_id, "completed": False
     })
 
+# Handle Answer Submission
 @app.post("/answer/{session_id}", response_class=HTMLResponse)
 async def submit_answer(request: Request, session_id: str, selected_option: str = Form(...), user_id: str = Form(...), index: int = Form(...)):
     pdf = pdfs_col.find_one({"file_id": session_id})
@@ -147,6 +154,12 @@ async def submit_answer(request: Request, session_id: str, selected_option: str 
 
     return RedirectResponse(f"/questions/{session_id}?user_id={user_id}&index={index}", status_code=303)
 
+# Custom 404 Handler
 @app.exception_handler(404)
 async def not_found(request: Request, exc):
     return templates.TemplateResponse("404.html", {"request": request}, status_code=404)
+
+# Run with: uvicorn main:app --reload
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run("main:app", host="127.0.0.1", port=8000, reload=True)
