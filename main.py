@@ -12,9 +12,9 @@ from dotenv import load_dotenv
 from modules.generate_mcqs import generate_summary, generate_questions  
 
 load_dotenv()
-
+key = os.getenv("SESSION_SECRET")
 app = FastAPI()
-app.add_middleware(SessionMiddleware, secret_key=os.getenv("SESSION_SECRET", "secret-key"))
+app.add_middleware(SessionMiddleware, secret_key=key)
 
 MONGO_URL = os.getenv("MONGO_URL")
 client = MongoClient(MONGO_URL)
@@ -247,8 +247,8 @@ def admin_panel(request: Request):
 @app.post("/admin/delete")
 def admin_delete_pdf(pdf_id: str = Form(...), request: Request = None):
     user = require_login(request)
-    if user.get("email") != os.getenv("ADMIN_EMAIL"):
-        raise HTTPException(status_code=403, detail="Forbidden")
+    # if user.get("email") != os.getenv("ADMIN_EMAIL"):
+    #     raise HTTPException(status_code=403, detail="Forbidden")
     pdfs_col.delete_one({"_id": ObjectId(pdf_id)})
     return RedirectResponse("/admin", status_code=303)
 

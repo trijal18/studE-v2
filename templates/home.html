@@ -7,7 +7,7 @@
   <a href="/upload">Upload PDF</a> |
   <a href="/quiz_redirect">Start Quiz by PDF ID</a> |
   <a href="/leaderboard">Leaderboard</a> |
-  {% if user.email == getenv('ADMIN_EMAIL') %}
+  {% if user.username=="admin" %}
   <a href="/admin">Admin Panel</a> |
   {% endif %}
   <a href="/logout">Logout</a>
