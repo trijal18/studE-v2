@@ -1,0 +1,34 @@
+2025-06-05 03:36:19,768 - WARNING - Failed login attempt for email: trijalvshinde@gmail.com
+2025-06-05 03:37:03,115 - INFO - New user registered: trijalvshinde@gmail.com
+2025-06-05 03:42:33,945 - WARNING - 404 Not Found: http://127.0.0.1:8000/favicon.ico
+2025-06-05 03:42:45,498 - INFO - User logged in: trijalvshinde@gmail.com
+2025-06-05 03:43:10,467 - INFO - Generating summary and questions for PDF uploaded by trijalvshinde@gmail.com
+2025-06-05 03:43:18,242 - INFO - Quiz generated and stored with ID 6840c4feec2e7dac96ed4c8a for trijalvshinde@gmail.com
+2025-06-05 03:43:39,629 - INFO - User trijalvshinde@gmail.com answered incorrectly for question 1 in PDF 6840c4feec2e7dac96ed4c8a
+2025-06-05 03:43:43,899 - INFO - User trijalvshinde@gmail.com answered incorrectly for question 2 in PDF 6840c4feec2e7dac96ed4c8a
+2025-06-05 03:43:47,262 - INFO - User trijalvshinde@gmail.com answered incorrectly for question 3 in PDF 6840c4feec2e7dac96ed4c8a
+2025-06-05 03:43:50,984 - INFO - User trijalvshinde@gmail.com answered incorrectly for question 4 in PDF 6840c4feec2e7dac96ed4c8a
+2025-06-05 03:43:54,323 - INFO - User trijalvshinde@gmail.com answered incorrectly for question 5 in PDF 6840c4feec2e7dac96ed4c8a
+2025-06-05 03:44:03,778 - INFO - Leaderboard page viewed
+2025-06-05 03:47:16,517 - INFO - Leaderboard page viewed
+2025-06-05 03:47:37,843 - WARNING - PDF not found: 683e4af51f9bb10cbe50ed20
+2025-06-05 03:47:37,844 - WARNING - 404 Not Found: http://127.0.0.1:8000/summary/683e4af51f9bb10cbe50ed20
+2025-06-05 03:48:19,972 - INFO - New user registered: admin@admin.com
+2025-06-05 03:49:03,262 - INFO - User admin@admin.com answered incorrectly for question 1 in PDF 6840c4feec2e7dac96ed4c8a
+2025-06-05 03:49:07,100 - INFO - User admin@admin.com answered incorrectly for question 2 in PDF 6840c4feec2e7dac96ed4c8a
+2025-06-05 03:49:11,248 - INFO - User admin@admin.com answered correctly for question 3 in PDF 6840c4feec2e7dac96ed4c8a
+2025-06-05 03:49:14,218 - INFO - User admin@admin.com answered incorrectly for question 4 in PDF 6840c4feec2e7dac96ed4c8a
+2025-06-05 03:49:17,267 - INFO - User admin@admin.com answered incorrectly for question 5 in PDF 6840c4feec2e7dac96ed4c8a
+2025-06-05 03:49:22,783 - INFO - Leaderboard page viewed
+2025-06-05 03:49:47,756 - INFO - Generating summary and questions for PDF uploaded by admin@admin.com
+2025-06-05 03:49:56,861 - INFO - Quiz generated and stored with ID 6840c68c91cb644c0eb97e02 for admin@admin.com
+2025-06-05 03:50:04,766 - INFO - User admin@admin.com answered correctly for question 1 in PDF 6840c68c91cb644c0eb97e02
+2025-06-05 03:50:08,679 - INFO - User admin@admin.com answered incorrectly for question 2 in PDF 6840c68c91cb644c0eb97e02
+2025-06-05 03:50:11,466 - INFO - User admin@admin.com answered incorrectly for question 3 in PDF 6840c68c91cb644c0eb97e02
+2025-06-05 03:50:15,399 - INFO - User admin@admin.com answered correctly for question 4 in PDF 6840c68c91cb644c0eb97e02
+2025-06-05 03:50:19,325 - INFO - User admin@admin.com answered incorrectly for question 5 in PDF 6840c68c91cb644c0eb97e02
+2025-06-05 03:50:24,005 - INFO - User admin@admin.com answered incorrectly for question 6 in PDF 6840c68c91cb644c0eb97e02
+2025-06-05 03:50:27,153 - INFO - User admin@admin.com answered incorrectly for question 7 in PDF 6840c68c91cb644c0eb97e02
+2025-06-05 03:50:30,176 - INFO - User admin@admin.com answered incorrectly for question 8 in PDF 6840c68c91cb644c0eb97e02
+2025-06-05 03:50:37,263 - INFO - Leaderboard page viewed
+2025-06-05 03:50:47,899 - INFO - User logged out: admin@admin.com

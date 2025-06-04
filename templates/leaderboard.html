@@ -1,14 +1,326 @@
 <!DOCTYPE html>
-<html>
-<head><title>Leaderboard</title></head>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Leaderboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            max-width: 800px;
+            width: 100%;
+            margin-top: 20px;
+            animation: slideIn 0.8s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        h2 {
+            color: #2c3e50;
+            font-size: 2.5rem;
+            margin-bottom: 30px;
+            text-align: center;
+            font-weight: 300;
+            letter-spacing: -1px;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .trophy-icon {
+            font-size: 3rem;
+            margin-bottom: 10px;
+            display: block;
+            text-align: center;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 30px;
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        th {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 20px;
+            text-align: left;
+            font-weight: 600;
+            font-size: 1.1rem;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+
+        th:first-child {
+            border-top-left-radius: 15px;
+        }
+
+        th:last-child {
+            border-top-right-radius: 15px;
+        }
+
+        td {
+            padding: 18px 20px;
+            border-bottom: 1px solid #f0f0f0;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        tr:nth-child(even) {
+            background-color: #f8f9fa;
+        }
+
+        tr:hover {
+            background: linear-gradient(90deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1));
+            transform: scale(1.01);
+        }
+
+        /* Special styling for top 3 positions */
+        tr:nth-child(2) { /* First place (after header) */
+            background: linear-gradient(90deg, rgba(255, 215, 0, 0.2), rgba(255, 223, 0, 0.1));
+            font-weight: 600;
+        }
+
+        tr:nth-child(2):hover {
+            background: linear-gradient(90deg, rgba(255, 215, 0, 0.3), rgba(255, 223, 0, 0.2));
+        }
+
+        tr:nth-child(3) { /* Second place */
+            background: linear-gradient(90deg, rgba(192, 192, 192, 0.2), rgba(192, 192, 192, 0.1));
+            font-weight: 500;
+        }
+
+        tr:nth-child(3):hover {
+            background: linear-gradient(90deg, rgba(192, 192, 192, 0.3), rgba(192, 192, 192, 0.2));
+        }
+
+        tr:nth-child(4) { /* Third place */
+            background: linear-gradient(90deg, rgba(205, 127, 50, 0.2), rgba(205, 127, 50, 0.1));
+            font-weight: 500;
+        }
+
+        tr:nth-child(4):hover {
+            background: linear-gradient(90deg, rgba(205, 127, 50, 0.3), rgba(205, 127, 50, 0.2));
+        }
+
+        /* Position badges */
+        tr:nth-child(2) td:first-child::before {
+            content: "🥇 ";
+            font-size: 1.2rem;
+        }
+
+        tr:nth-child(3) td:first-child::before {
+            content: "🥈 ";
+            font-size: 1.2rem;
+        }
+
+        tr:nth-child(4) td:first-child::before {
+            content: "🥉 ";
+            font-size: 1.2rem;
+        }
+
+        /* Score styling */
+        td:last-child {
+            font-weight: 600;
+            color: #667eea;
+            font-size: 1.1rem;
+        }
+
+        .back-link {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            text-decoration: none;
+            padding: 15px 30px;
+            border-radius: 50px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+            position: relative;
+            overflow: hidden;
+            display: inline-block;
+            margin-top: 20px;
+        }
+
+        .back-link::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #764ba2, #667eea);
+            transition: left 0.3s ease;
+            z-index: -1;
+        }
+
+        .back-link:hover::before {
+            left: 0;
+        }
+
+        .back-link:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+        }
+
+        .back-link:active {
+            transform: translateY(0);
+        }
+
+        .link-container {
+            text-align: center;
+        }
+
+        /* Empty state styling */
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: #7f8c8d;
+            font-style: italic;
+        }
+
+        /* Responsive design */
+        @media (max-width: 768px) {
+            .container {
+                padding: 30px 20px;
+                margin: 10px;
+            }
+
+            h2 {
+                font-size: 2rem;
+                margin-bottom: 25px;
+            }
+
+            th, td {
+                padding: 15px 12px;
+                font-size: 0.9rem;
+            }
+
+            th {
+                font-size: 1rem;
+            }
+
+            .back-link {
+                padding: 12px 25px;
+                font-size: 0.9rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            h2 {
+                font-size: 1.6rem;
+            }
+
+            th, td {
+                padding: 12px 8px;
+                font-size: 0.85rem;
+            }
+
+            .trophy-icon {
+                font-size: 2rem;
+            }
+        }
+
+        /* Add subtle animation to the background */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(45deg, transparent 30%, rgba(255, 255, 255, 0.05) 30%, rgba(255, 255, 255, 0.05) 70%, transparent 70%);
+            background-size: 60px 60px;
+            animation: movePattern 20s linear infinite;
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        @keyframes movePattern {
+            0% {
+                transform: translateX(-60px) translateY(-60px);
+            }
+            100% {
+                transform: translateX(0) translateY(0);
+            }
+        }
+
+        /* Table animation on load */
+        tr {
+            animation: fadeInUp 0.6s ease-out forwards;
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
+        tr:nth-child(1) { animation-delay: 0.1s; }
+        tr:nth-child(2) { animation-delay: 0.2s; }
+        tr:nth-child(3) { animation-delay: 0.3s; }
+        tr:nth-child(4) { animation-delay: 0.4s; }
+        tr:nth-child(5) { animation-delay: 0.5s; }
+        tr:nth-child(6) { animation-delay: 0.6s; }
+        tr:nth-child(7) { animation-delay: 0.7s; }
+        tr:nth-child(8) { animation-delay: 0.8s; }
+        tr:nth-child(9) { animation-delay: 0.9s; }
+        tr:nth-child(10) { animation-delay: 1.0s; }
+
+        @keyframes fadeInUp {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+</head>
 <body>
-<h2>Top Scorers</h2>
-<table border="1">
-  <tr><th>Username</th><th>Score</th></tr>
-  {% for item in leaderboard %}
-  <tr><td>{{ item.username }}</td><td>{{ item.score }}</td></tr>
-  {% endfor %}
-</table>
-<a href="/home">Back to Home</a>
+    <div class="container">
+        <div class="trophy-icon">🏆</div>
+        <h2>Top Scorers</h2>
+        <table border="1">
+            <tr><th>Username</th><th>Score</th></tr>
+            {% for item in leaderboard %}
+            <tr><td>{{ item.username }}</td><td>{{ item.score }}</td></tr>
+            {% endfor %}
+        </table>
+        <div class="link-container">
+            <a href="/home" class="back-link">Back to Home</a>
+        </div>
+    </div>
 </body>
 </html>

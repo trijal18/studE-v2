@@ -1,7 +1,8 @@
 import os
 import uuid
 import bcrypt
-from fastapi import FastAPI, Request, Form, UploadFile, File, HTTPException, Depends
+import logging
+from fastapi import FastAPI, Request, Form, UploadFile, File, HTTPException
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
@@ -9,7 +10,19 @@ from starlette.middleware.sessions import SessionMiddleware
 from pymongo import MongoClient
 from bson import ObjectId
 from dotenv import load_dotenv
-from modules.generate_mcqs import generate_summary, generate_questions  
+from modules.generate_mcqs import generate_summary, generate_questions
+
+# ----------------- Logging Setup -----------------
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s - %(levelname)s - %(message)s",
+    handlers=[
+        logging.FileHandler("app.log"),
+        logging.StreamHandler()
+    ]
+)
+logger = logging.getLogger(__name__)
+# -------------------------------------------------
 
 load_dotenv()
 key = os.getenv("SESSION_SECRET")
@@ -17,7 +30,7 @@ app = FastAPI()
 app.add_middleware(SessionMiddleware, secret_key=key)
 
 MONGO_URL = os.getenv("MONGO_URL")
-client = MongoClient(MONGO_URL)
+client = MongoClient("mongodb+srv://devtrijalshinde:mK3TOongvQcjRENe@cluster0.co7illj.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0") #MONGO_URL)
 db = client.mcqapp
 users_col = db.users
 pdfs_col = db.pdfs
@@ -57,8 +70,10 @@ def login_page(request: Request):
 def login(request: Request, email: str = Form(...), password: str = Form(...)):
     user = users_col.find_one({"email": email})
     if not user or not bcrypt.checkpw(password.encode(), user["password"]):
+        logger.warning(f"Failed login attempt for email: {email}")
         return templates.TemplateResponse("login.html", {"request": request, "error": "Invalid email or password"})
     request.session["user_id"] = str(user["_id"])
+    logger.info(f"User logged in: {email}")
     return RedirectResponse("/home", status_code=303)
 
 
@@ -70,16 +85,21 @@ def signup_page(request: Request):
 @app.post("/signup")
 def signup(request: Request, username: str = Form(...), email: str = Form(...), password: str = Form(...)):
     if users_col.find_one({"email": email}):
+        logger.warning(f"Signup attempt with already registered email: {email}")
         return templates.TemplateResponse("signup.html", {"request": request, "error": "Email already registered"})
     hashed = bcrypt.hashpw(password.encode(), bcrypt.gensalt())
     result = users_col.insert_one({"username": username, "email": email, "password": hashed})
     request.session["user_id"] = str(result.inserted_id)
+    logger.info(f"New user registered: {email}")
     return RedirectResponse("/home", status_code=303)
 
 
 @app.get("/logout")
 def logout(request: Request):
+    user = get_current_user(request)
     request.session.clear()
+    if user:
+        logger.info(f"User logged out: {user['email']}")
     return RedirectResponse("/", status_code=303)
 
 
@@ -99,16 +119,20 @@ def upload_page(request: Request):
 async def upload_pdf(request: Request, file: UploadFile = File(...)):
     user = require_login(request)
     if file.content_type != "application/pdf":
+        logger.warning(f"Rejected upload: Non-PDF file uploaded by {user['email']}")
         return templates.TemplateResponse("upload.html", {"request": request, "user": user, "error": "Only PDF files allowed"})
+
     filename = f"{uuid.uuid4()}.pdf"
     file_path = os.path.join(UPLOAD_DIR, filename)
     with open(file_path, "wb") as f:
         f.write(await file.read())
 
     try:
+        logger.info(f"Generating summary and questions for PDF uploaded by {user['email']}")
         summary = generate_summary(file_path)
         questions = generate_questions(file_path)
     except Exception as e:
+        logger.error(f"Quiz generation failed: {e}")
         return templates.TemplateResponse("upload.html", {"request": request, "user": user, "error": f"Failed to generate quiz: {e}"})
 
     pdf_doc = {
@@ -120,6 +144,7 @@ async def upload_pdf(request: Request, file: UploadFile = File(...)):
     }
     result = pdfs_col.insert_one(pdf_doc)
     pdf_id = str(result.inserted_id)
+    logger.info(f"Quiz generated and stored with ID {pdf_id} for {user['email']}")
     return RedirectResponse(f"/summary/{pdf_id}", status_code=303)
 
 
@@ -128,6 +153,7 @@ def summary_page(request: Request, pdf_id: str):
     user = require_login(request)
     pdf = pdfs_col.find_one({"_id": ObjectId(pdf_id)})
     if not pdf:
+        logger.warning(f"PDF not found: {pdf_id}")
         raise HTTPException(status_code=404, detail="PDF not found")
     return templates.TemplateResponse("summary.html", {"request": request, "summary": pdf["summary"], "pdf_id": pdf_id})
 
@@ -148,10 +174,10 @@ def questions_page(request: Request, pdf_id: str, index: int = 0):
     user = require_login(request)
     pdf = pdfs_col.find_one({"_id": ObjectId(pdf_id)})
     if not pdf:
+        logger.warning(f"Question access failed. PDF not found: {pdf_id}")
         raise HTTPException(status_code=404, detail="PDF not found")
     questions = pdf.get("questions", [])
     if index >= len(questions):
-        # Show score summary
         score_doc = scores_col.find_one({"pdf_id": pdf_id, "user_id": user["_id"]})
         score = score_doc["score"] if score_doc else 0
         return templates.TemplateResponse(
@@ -183,6 +209,7 @@ def submit_answer(pdf_id: str, index: int = Form(...), selected_option: str = Fo
     user = require_login(request)
     pdf = pdfs_col.find_one({"_id": ObjectId(pdf_id)})
     if not pdf:
+        logger.warning(f"Answer submission failed. PDF not found: {pdf_id}")
         raise HTTPException(status_code=404, detail="PDF not found")
     questions = pdf.get("questions", [])
     if index < 1 or index > len(questions):
@@ -198,6 +225,9 @@ def submit_answer(pdf_id: str, index: int = Form(...), selected_option: str = Fo
 
     if is_correct:
         scores_col.update_one({"_id": score_doc["_id"]}, {"$inc": {"score": 1}})
+        logger.info(f"User {user['email']} answered correctly for question {index} in PDF {pdf_id}")
+    else:
+        logger.info(f"User {user['email']} answered incorrectly for question {index} in PDF {pdf_id}")
 
     return RedirectResponse(f"/questions/{pdf_id}?index={index}", status_code=303)
 
@@ -206,7 +236,6 @@ def submit_answer(pdf_id: str, index: int = Form(...), selected_option: str = Fo
 def leaderboard_page(request: Request):
     user = require_login(request)
 
-    # Aggregate total scores by user across all PDFs
     pipeline = [
         {
             "$group": {
@@ -214,26 +243,20 @@ def leaderboard_page(request: Request):
                 "total_score": {"$sum": "$score"}
             }
         },
-        {
-            "$sort": {"total_score": -1}
-        },
-        {
-            "$limit": 10
-        }
+        {"$sort": {"total_score": -1}},
+        {"$limit": 10}
     ]
     top_scores = list(scores_col.aggregate(pipeline))
 
-    # Lookup user details
     leaderboard = []
     for item in top_scores:
         user_doc = users_col.find_one({"_id": item["_id"]})
         if user_doc:
             leaderboard.append({"username": user_doc["username"], "score": item["total_score"]})
 
+    logger.info("Leaderboard page viewed")
     return templates.TemplateResponse("leaderboard.html", {"request": request, "leaderboard": leaderboard})
 
-
-# Admin panel
 
 @app.get("/admin", response_class=HTMLResponse)
 def admin_panel(request: Request):
@@ -247,14 +270,19 @@ def admin_panel(request: Request):
 @app.post("/admin/delete")
 def admin_delete_pdf(pdf_id: str = Form(...), request: Request = None):
     user = require_login(request)
+    # Uncomment to restrict deletion to admin only
     # if user.get("email") != os.getenv("ADMIN_EMAIL"):
     #     raise HTTPException(status_code=403, detail="Forbidden")
     pdfs_col.delete_one({"_id": ObjectId(pdf_id)})
+    logger.info(f"PDF {pdf_id} deleted by {user['email']}")
     return RedirectResponse("/admin", status_code=303)
+
 
 @app.exception_handler(404)
 async def not_found(request: Request, exc):
+    logger.warning(f"404 Not Found: {request.url}")
     return templates.TemplateResponse("404.html", {"request": request}, status_code=404)
+
 
 if __name__ == "__main__":
     import uvicorn
