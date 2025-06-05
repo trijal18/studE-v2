@@ -61,9 +61,9 @@ def require_login(request: Request):
 
 # --- Routes ---
 
-# @app.get("/", response_class=HTMLResponse)
-# def login_page(request: Request):
-#     return templates.TemplateResponse("login.html", {"request": request, "error": None})
+@app.get("/", response_class=HTMLResponse)
+def login_page(request: Request):
+    return templates.TemplateResponse("login.html", {"request": request, "error": None})
 
 
 @app.post("/login")
