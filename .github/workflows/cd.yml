@@ -8,17 +8,26 @@ on:
 
 jobs:
   deploy:
-    runs-on: self-hosted
+    runs-on: self-hosted 
 
     steps:
-    - name: Pull latest image
-      run: sudo docker pull ${{ secrets.DOCKER_USERNAME }}/stude-v2:latest
-
-    - name: Stop and remove old container
+    - name: Pull latest Docker image
       run: |
+        echo "Pulling latest image from Docker Hub..."
+        sudo docker pull ${{ secrets.DOCKER_USERNAME }}/stude-v2:latest
+
+    - name: Stop and remove old containers
+      run: |
+        echo "Stopping and removing old containers..."
         sudo docker-compose -f /home/ubuntu/studE-v2/docker-compose.yml down || true
 
-    - name: Deploy new container
+    - name: Deploy new container(s)
       run: |
+        echo "Starting new containers..."
         cd /home/ubuntu/studE-v2
         sudo docker-compose -f docker-compose.yml up -d
+
+    - name: Verify deployment
+      run: |
+        echo "Listing running containers:"
+        sudo docker ps
