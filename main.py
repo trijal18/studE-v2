@@ -284,7 +284,7 @@ async def not_found(request: Request, exc):
     return templates.TemplateResponse("404.html", {"request": request}, status_code=404)
 
 @app.get("/test", response_class=JSONResponse)
-def login_page(request: Request):
+def test(request: Request):
     return JSONResponse(content={"status": "working"})
 
 if __name__ == "__main__":
