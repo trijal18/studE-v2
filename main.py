@@ -3,7 +3,7 @@ import uuid
 import bcrypt
 import logging
 from fastapi import FastAPI, Request, Form, UploadFile, File, HTTPException
-from fastapi.responses import HTMLResponse, RedirectResponse
+from fastapi.responses import HTMLResponse, RedirectResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from starlette.middleware.sessions import SessionMiddleware
@@ -283,6 +283,9 @@ async def not_found(request: Request, exc):
     logger.warning(f"404 Not Found: {request.url}")
     return templates.TemplateResponse("404.html", {"request": request}, status_code=404)
 
+@app.get("/test", response_class=JSONResponse)
+def login_page(request: Request):
+    return JSONResponse(content={"status": "working"})
 
 if __name__ == "__main__":
     import uvicorn
