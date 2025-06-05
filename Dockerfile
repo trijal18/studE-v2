@@ -1,27 +1,18 @@
-# Use official Python image
-FROM python:3.10-slim
+# Use a minimal Python base image
+FROM python:3.11-slim
 
-# Set working directory
+# Set working directory in container
 WORKDIR /app
 
-# Install system packages required by pdf tools
-RUN apt-get update && apt-get install -y \
-    build-essential \
-    poppler-utils \
- && rm -rf /var/lib/apt/lists/*
-
-# Install dependencies
+# Copy requirements and install dependencies
 COPY requirements.txt .
-RUN pip install --upgrade pip && pip install -r requirements.txt
+RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy rest of the code
+# Copy the whole project folder into the container
 COPY . .
 
-# Create folders used by the app
-RUN mkdir -p uploads static
-
-# Expose FastAPI port
+# Expose the FastAPI port
 EXPOSE 8000
 
-# Start the FastAPI server
+# Start the FastAPI app using uvicorn
 CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]

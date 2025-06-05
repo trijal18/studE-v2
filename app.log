@@ -32,3 +32,23 @@
 2025-06-05 03:50:30,176 - INFO - User admin@admin.com answered incorrectly for question 8 in PDF 6840c68c91cb644c0eb97e02
 2025-06-05 03:50:37,263 - INFO - Leaderboard page viewed
 2025-06-05 03:50:47,899 - INFO - User logged out: admin@admin.com
+2025-06-05 04:27:46,793 - INFO - User logged in: admin@admin.com
+2025-06-05 04:28:33,083 - INFO - User admin@admin.com answered incorrectly for question 1 in PDF 6840c4feec2e7dac96ed4c8a
+2025-06-05 04:28:36,318 - INFO - User admin@admin.com answered incorrectly for question 2 in PDF 6840c4feec2e7dac96ed4c8a
+2025-06-05 04:28:40,207 - INFO - User admin@admin.com answered correctly for question 3 in PDF 6840c4feec2e7dac96ed4c8a
+2025-06-05 04:28:43,426 - INFO - User admin@admin.com answered incorrectly for question 4 in PDF 6840c4feec2e7dac96ed4c8a
+2025-06-05 04:28:46,094 - INFO - User admin@admin.com answered incorrectly for question 5 in PDF 6840c4feec2e7dac96ed4c8a
+2025-06-05 04:28:51,264 - INFO - Leaderboard page viewed
+2025-06-05 04:29:11,366 - INFO - PDF 6840c4feec2e7dac96ed4c8a deleted by admin@admin.com
+2025-06-05 04:29:25,777 - WARNING - PDF not found: 6840c4feec2e7dac96ed4c8a
+2025-06-05 04:29:25,778 - WARNING - 404 Not Found: http://127.0.0.1:8000/summary/6840c4feec2e7dac96ed4c8a
+2025-06-05 07:07:37,935 - WARNING - 404 Not Found: http://localhost:8000/favicon.ico
+2025-06-05 07:07:47,029 - INFO - User logged in: trijalvshinde@gmail.com
+2025-06-05 07:08:04,902 - INFO - Generating summary and questions for PDF uploaded by trijalvshinde@gmail.com
+2025-06-05 07:08:10,852 - INFO - Quiz generated and stored with ID 6841425ad64ae720607bc384 for trijalvshinde@gmail.com
+2025-06-05 07:08:20,093 - INFO - User trijalvshinde@gmail.com answered incorrectly for question 1 in PDF 6841425ad64ae720607bc384
+2025-06-05 07:08:23,840 - INFO - User trijalvshinde@gmail.com answered incorrectly for question 2 in PDF 6841425ad64ae720607bc384
+2025-06-05 07:08:27,530 - INFO - User trijalvshinde@gmail.com answered incorrectly for question 3 in PDF 6841425ad64ae720607bc384
+2025-06-05 07:08:31,940 - INFO - User trijalvshinde@gmail.com answered incorrectly for question 4 in PDF 6841425ad64ae720607bc384
+2025-06-05 07:08:34,972 - INFO - User trijalvshinde@gmail.com answered incorrectly for question 5 in PDF 6841425ad64ae720607bc384
+2025-06-05 07:08:39,813 - INFO - Leaderboard page viewed
