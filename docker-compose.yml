@@ -2,6 +2,7 @@ version: '3.9'
 
 services:
   web:
+  # jfnsfj
     image: trijal/stude-v2:latest
     container_name: fastapi_stude
     ports:
