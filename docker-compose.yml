@@ -1,0 +1,54 @@
+version: '3.9'
+
+services:
+  web:
+    image: trijal/stude-v2:latest
+    container_name: fastapi_stude
+    ports:
+      - "8000:8000"
+    env_file:
+      - ../.env
+    depends_on:
+      - mongo
+    networks:
+      - studenet
+
+  mongo:
+    image: mongo
+    container_name: mongo_stude
+    restart: always
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_DATABASE: studE
+    networks:
+      - studenet
+
+  prometheus:
+    image: prom/prometheus
+    container_name: prometheus
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+    ports:
+      - "9090:9090"
+    networks:
+      - studenet
+
+  node_exporter:
+    image: prom/node-exporter
+    container_name: node_exporter
+    ports:
+      - "9100:9100"
+    networks:
+      - studenet
+
+  grafana:
+    image: grafana/grafana
+    container_name: grafana
+    ports:
+      - "3000:3000"
+    networks:
+      - studenet
+
+networks:
+  studenet:
