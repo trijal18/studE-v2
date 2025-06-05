@@ -11,6 +11,7 @@ from pymongo import MongoClient
 from bson import ObjectId
 from dotenv import load_dotenv
 from modules.generate_mcqs import generate_summary, generate_questions
+from prometheus_fastapi_instrumentator import Instrumentator  # Prometheus
 
 # ----------------- Logging Setup -----------------
 logging.basicConfig(
@@ -29,8 +30,12 @@ key = os.getenv("SESSION_SECRET")
 app = FastAPI()
 app.add_middleware(SessionMiddleware, secret_key=key)
 
+# ---------- Prometheus Instrumentation ----------
+instrumentator = Instrumentator().instrument(app).expose(app)
+
+# ---------------- MongoDB Setup -----------------
 MONGO_URL = os.getenv("MONGO_URL")
-client = MongoClient("mongodb+srv://devtrijalshinde:mK3TOongvQcjRENe@cluster0.co7illj.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0") #MONGO_URL)
+client = MongoClient(MONGO_URL)
 db = client.mcqapp
 users_col = db.users
 pdfs_col = db.pdfs
@@ -270,9 +275,6 @@ def admin_panel(request: Request):
 @app.post("/admin/delete")
 def admin_delete_pdf(pdf_id: str = Form(...), request: Request = None):
     user = require_login(request)
-    # Uncomment to restrict deletion to admin only
-    # if user.get("email") != os.getenv("ADMIN_EMAIL"):
-    #     raise HTTPException(status_code=403, detail="Forbidden")
     pdfs_col.delete_one({"_id": ObjectId(pdf_id)})
     logger.info(f"PDF {pdf_id} deleted by {user['email']}")
     return RedirectResponse("/admin", status_code=303)
@@ -283,9 +285,11 @@ async def not_found(request: Request, exc):
     logger.warning(f"404 Not Found: {request.url}")
     return templates.TemplateResponse("404.html", {"request": request}, status_code=404)
 
+
 @app.get("/test", response_class=JSONResponse)
 def test(request: Request):
     return JSONResponse(content={"status": "working"})
+
 
 if __name__ == "__main__":
     import uvicorn

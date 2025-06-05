@@ -53,3 +53,6 @@
 2025-06-05 07:08:34,972 - INFO - User trijalvshinde@gmail.com answered incorrectly for question 5 in PDF 6841425ad64ae720607bc384
 2025-06-05 07:08:39,813 - INFO - Leaderboard page viewed
 2025-06-05 15:15:24,009 - WARNING - 404 Not Found: http://127.0.0.1:8000/favicon.ico
+2025-06-06 05:21:50,789 - WARNING - 404 Not Found: http://127.0.0.1:8000/favicon.ico
+2025-06-06 05:22:00,760 - INFO - User logged in: trijalvshinde@gmail.com
+2025-06-06 05:22:05,129 - INFO - User logged out: trijalvshinde@gmail.com
