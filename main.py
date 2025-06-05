@@ -283,9 +283,9 @@ async def not_found(request: Request, exc):
     logger.warning(f"404 Not Found: {request.url}")
     return templates.TemplateResponse("404.html", {"request": request}, status_code=404)
 
-# @app.get("/test", response_class=JSONResponse)
-# def login_page(request: Request):
-#     return JSONResponse(content={"status": "working"})
+@app.get("/test", response_class=JSONResponse)
+def login_page(request: Request):
+    return JSONResponse(content={"status": "working"})
 
 if __name__ == "__main__":
     import uvicorn
