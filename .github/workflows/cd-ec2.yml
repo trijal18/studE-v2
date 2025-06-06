@@ -1,0 +1,54 @@
+name: CD Pipeline
+
+on:
+  workflow_run:
+    workflows: ["CI Pipeline"]
+    types:
+      - completed
+
+  workflow_dispatch: # Optional manual trigger
+
+jobs:
+  deploy:
+    runs-on: self-hosted
+
+    steps:
+    - name: Stop all running containers
+      run: |
+        echo "Stopping all running containers..."
+        if [ "$(sudo docker ps -q)" ]; then
+          sudo docker stop $(sudo docker ps -q)
+        else
+          echo "No running containers to stop."
+        fi
+
+    - name: Remove all containers
+      run: |
+        echo "Removing all containers..."
+        if [ "$(sudo docker ps -aq)" ]; then
+          sudo docker rm -f $(sudo docker ps -aq)
+        else
+          echo "No containers to remove."
+        fi
+
+    - name: Cleanup dangling images, volumes, and networks
+      run: |
+        echo "Cleaning up dangling images, volumes, and networks..."
+        sudo docker image prune -af
+        sudo docker volume prune -f
+        sudo docker network prune -f
+
+    - name: Pull latest Docker image
+      run: |
+        echo "Pulling latest image from Docker Hub..."
+        sudo docker pull ${{ secrets.DOCKER_USERNAME }}/stude-v2:latest
+
+    - name: Deploy new containers with docker-compose
+      run: |
+        echo "Deploying containers using docker-compose..."
+        sudo docker-compose -f /home/ubuntu/docker-compose.yml up -d
+
+    - name: Verify deployment
+      run: |
+        echo "Listing running containers:"
+        sudo docker ps
