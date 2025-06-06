@@ -5,8 +5,8 @@ on:
     workflows: ["CI Pipeline"]
     types:
       - completed
-    branches:
-      - mongo
+
+  workflow_dispatch: # Optional manual trigger
 
 jobs:
   deploy:
