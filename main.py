@@ -288,7 +288,7 @@ async def not_found(request: Request, exc):
 
 @app.get("/test", response_class=JSONResponse)
 def test(request: Request):
-    return JSONResponse(content={"status": "working"})
+    return JSONResponse(content={"status": "swastik ki mkc"})
 
 
 if __name__ == "__main__":
